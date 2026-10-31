@@ -1,5 +1,9 @@
 # Faceless QC Lite
 
+![tests](https://github.com/jasveerai88/faceless-qc-lite/actions/workflows/tests.yml/badge.svg)
+![license](https://img.shields.io/badge/license-MIT-green)
+![version](https://img.shields.io/badge/version-1.0.0-blue)
+
 **Free pre-upload checker for AI / faceless videos.** Drop in a finished MP4 — get a plain-English PASS / HOLD in seconds. Local only: your video is never uploaded anywhere.
 
 ## The 3 free checks
