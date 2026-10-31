@@ -14,6 +14,16 @@ python3 src/faceless_qc_lite.py my-video.mp4
 ```
 Exit codes: 0 PASS, 2 HOLD, 1 error — drop it straight into a publish pipeline.
 
+## Real example (our own file, 2026-10-31)
+```
+Faceless QC Lite — intro-loop.mp4
+  [HOLD] Loudness: integrated loudness -21.6 LUFS (target -14 +/-2)
+  [PASS] Dead air: longest in-story silence 0.0s
+  [PASS] Black frames: no black segments >= 0.5s
+Verdict: HOLD
+```
+That file was heading for upload 7.6 LUFS too quiet. Lite caught it in seconds.
+
 ## Why this exists
 Built from measured failure data on real faceless channels: videos most often die because they are too quiet, have a dead gap mid-story, or flash black frames — and most creators only find out after upload.
 
