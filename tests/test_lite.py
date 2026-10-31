@@ -30,7 +30,7 @@ def test_missing_file_is_clean_error():
 
 def test_help_works():
     r = subprocess.run([sys.executable, str(SRC), "--help"], capture_output=True, text=True)
-    assert r.returncode == 0 and "4 free checks" in r.stdout
+    assert r.returncode == 0 and "5 free checks" in r.stdout
 
 def _caption_status(srt_text):
     with tempfile.TemporaryDirectory() as d:
@@ -49,7 +49,14 @@ def test_captions_missing_sidecar_skips():
         video = Path(d) / "v.mp4"; video.write_bytes(b"x")
         assert lite.check_captions(video, None)[0] == "SKIP"
 
+def test_resolution_full_hd_passes():
+    assert lite.classify_resolution(1080, 1920)[0] == "PASS"
+
+def test_resolution_low_holds():
+    assert lite.classify_resolution(640, 360)[0] == "HOLD"
+
 if __name__ == "__main__":
     test_missing_file_is_clean_error(); test_help_works()
     test_captions_slow_passes(); test_captions_fast_holds(); test_captions_missing_sidecar_skips()
-    print("5/5 PASS")
+    test_resolution_full_hd_passes(); test_resolution_low_holds()
+    print("7/7 PASS")

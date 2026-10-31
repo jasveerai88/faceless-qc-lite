@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Faceless QC Lite — free, open-source pre-upload checker for faceless videos.
 
-4 checks, local only, no uploads, no accounts:
+5 checks, local only, no uploads, no accounts:
   1. Loudness   — integrated LUFS vs the -14 LUFS streaming target (+/-2)
   2. Dead air   — longest silence inside the story (ending excluded)
   3. Black frames — black segments >= 0.5s inside the story
   4. Caption speed — median chars/sec from a .srt/.vtt sidecar (SKIP if none)
+  5. Resolution — frame size + orientation (HOLD if the short side < 720px)
 
 Needs: Python 3.10+ and FFmpeg on PATH.
 Exit codes: 0 PASS, 2 HOLD, 1 error.
@@ -101,6 +102,25 @@ def check_captions(video, captions_arg):
         return ("WARN", med, f"caption speed median {med:.1f} CPS, max {mx:.1f} (warn >17)")
     return ("PASS", med, f"caption speed median {med:.1f} CPS, max {mx:.1f} ({len(cps)} captions)")
 
+def classify_resolution(w, h):
+    short = min(w, h)
+    orient = "vertical" if h > w else ("landscape" if w > h else "square")
+    if short < 720:
+        return ("HOLD", short, f"{w}x{h} {orient} — short side {short}px is below 720p (HOLD)")
+    if short < 1080:
+        return ("WARN", short, f"{w}x{h} {orient} — usable, but below 1080p on the short side")
+    return ("PASS", short, f"{w}x{h} {orient} — full HD or better")
+
+def check_resolution(path):
+    r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0",
+                        "-show_entries", "stream=width,height",
+                        "-of", "csv=p=0", str(path)], capture_output=True, text=True)
+    try:
+        w, h = (int(x) for x in r.stdout.strip().split(",")[:2])
+    except (ValueError, IndexError):
+        return ("SKIP", None, "could not read frame size")
+    return classify_resolution(w, h)
+
 def probe_duration(path):
     r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
                         "-of", "csv=p=0", str(path)], capture_output=True, text=True)
@@ -110,7 +130,7 @@ def probe_duration(path):
         return None
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="Faceless QC Lite — 4 free checks for faceless videos")
+    ap = argparse.ArgumentParser(description="Faceless QC Lite — 5 free checks for faceless videos")
     ap.add_argument("video", help="video file to check")
     ap.add_argument("--captions", help="captions sidecar (.srt/.vtt); auto-detected beside the video when omitted")
     a = ap.parse_args(argv)
@@ -122,7 +142,8 @@ def main(argv=None):
     checks = [("Loudness", check_loudness(p)),
               ("Dead air", check_dead_air(p, dur)),
               ("Black frames", check_black(p)),
-              ("Caption speed", check_captions(p, a.captions))]
+              ("Caption speed", check_captions(p, a.captions)),
+              ("Resolution", check_resolution(p))]
     verdict = "PASS"
     print(f"Faceless QC Lite — {p.name}")
     for name, (status, _val, note) in checks:
