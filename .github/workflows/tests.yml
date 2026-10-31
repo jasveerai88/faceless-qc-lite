@@ -14,4 +14,9 @@ jobs:
         run: python3 tests/test_lite.py
       - name: Smoke run (missing file must exit 1)
         run: |
-          python3 src/faceless_qc_lite.py missing.mp4; test $? -eq 1
+          set +e
+          python3 src/faceless_qc_lite.py missing.mp4
+          code=$?
+          set -e
+          echo "exit code was $code"
+          test $code -eq 1
