@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """Faceless QC Lite — free, open-source pre-upload checker for faceless videos.
 
-3 checks, local only, no uploads, no accounts:
+4 checks, local only, no uploads, no accounts:
   1. Loudness   — integrated LUFS vs the -14 LUFS streaming target (+/-2)
   2. Dead air   — longest silence inside the story (ending excluded)
   3. Black frames — black segments >= 0.5s inside the story
+  4. Caption speed — median chars/sec from a .srt/.vtt sidecar (SKIP if none)
 
 Needs: Python 3.10+ and FFmpeg on PATH.
 Exit codes: 0 PASS, 2 HOLD, 1 error.
-The full Faceless QC (pause intelligence, caption speed, HTML worst-3
-report) is a separate paid product — this Lite tool always stays free.
+The full Faceless QC (pause intelligence, full caption gates, dynamics,
+HTML worst-3 report) is a separate paid product — Lite always stays free.
 """
-import argparse, re, subprocess, sys
+import argparse, re, statistics, subprocess, sys
 from pathlib import Path
 
 def run_ffmpeg(args):
@@ -54,6 +55,52 @@ def check_black(path):
         return ("WARN", len(hits), f"{len(hits)} black segment(s), first {float(s):.1f}s-{float(e):.1f}s")
     return ("PASS", 0, "no black segments >= 0.5s")
 
+def _ts_to_sec(ts):
+    ts = ts.replace(",", ".")
+    parts = [float(x) for x in ts.split(":")]
+    while len(parts) < 3:
+        parts.insert(0, 0.0)
+    return parts[0] * 3600 + parts[1] * 60 + parts[2]
+
+def parse_captions(path):
+    """Return a list of CPS (chars per second) values, one per caption event."""
+    text = Path(path).read_text(encoding="utf-8", errors="ignore")
+    events = []
+    for m in re.finditer(r"(\d{1,2}:\d{2}:\d{2}[.,]\d{1,3}|\d{1,2}:\d{2}[.,]\d{1,3})\s*-->\s*"
+                         r"(\d{1,2}:\d{2}:\d{2}[.,]\d{1,3}|\d{1,2}:\d{2}[.,]\d{1,3})([^\n]*)\n(.*?)(?=\n\s*\n|\Z)",
+                         text, re.S):
+        start, end = _ts_to_sec(m.group(1)), _ts_to_sec(m.group(2))
+        body = re.sub(r"<[^>]+>", "", m.group(4)).strip()
+        body = "\n".join(l for l in body.splitlines() if "-->" not in l and not l.strip().isdigit())
+        dur = end - start
+        if dur > 0 and body:
+            events.append(len(body.replace("\n", " ")) / dur)
+    return events
+
+def check_captions(video, captions_arg):
+    cap = None
+    if captions_arg:
+        cap = Path(captions_arg)
+        if not cap.is_file():
+            return ("SKIP", None, f"captions file not found: {captions_arg}")
+    else:
+        for ext in (".srt", ".vtt"):
+            side = video.with_suffix(ext)
+            if side.is_file():
+                cap = side
+                break
+    if cap is None:
+        return ("SKIP", None, "no captions sidecar (.srt/.vtt) — skipped, not passed")
+    cps = parse_captions(cap)
+    if not cps:
+        return ("SKIP", None, f"no caption events parsed from {cap.name}")
+    med, mx = statistics.median(cps), max(cps)
+    if med > 20 or mx > 30:
+        return ("HOLD", med, f"caption speed median {med:.1f} CPS, max {mx:.1f} (HOLD: median >20 or max >30)")
+    if med > 17:
+        return ("WARN", med, f"caption speed median {med:.1f} CPS, max {mx:.1f} (warn >17)")
+    return ("PASS", med, f"caption speed median {med:.1f} CPS, max {mx:.1f} ({len(cps)} captions)")
+
 def probe_duration(path):
     r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
                         "-of", "csv=p=0", str(path)], capture_output=True, text=True)
@@ -63,8 +110,9 @@ def probe_duration(path):
         return None
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="Faceless QC Lite — 3 free checks for faceless videos")
+    ap = argparse.ArgumentParser(description="Faceless QC Lite — 4 free checks for faceless videos")
     ap.add_argument("video", help="video file to check")
+    ap.add_argument("--captions", help="captions sidecar (.srt/.vtt); auto-detected beside the video when omitted")
     a = ap.parse_args(argv)
     p = Path(a.video)
     if not p.is_file():
@@ -73,7 +121,8 @@ def main(argv=None):
     dur = probe_duration(p)
     checks = [("Loudness", check_loudness(p)),
               ("Dead air", check_dead_air(p, dur)),
-              ("Black frames", check_black(p))]
+              ("Black frames", check_black(p)),
+              ("Caption speed", check_captions(p, a.captions))]
     verdict = "PASS"
     print(f"Faceless QC Lite — {p.name}")
     for name, (status, _val, note) in checks:
