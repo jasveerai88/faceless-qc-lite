@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="300" viewBox="0 0 860 300">
+<rect width="860" height="300" rx="12" fill="#0d1117"/>
+<rect width="860" height="36" rx="12" fill="#161b22"/>
+<circle cx="24" cy="18" r="6" fill="#ff5f56"/><circle cx="46" cy="18" r="6" fill="#ffbd2e"/><circle cx="68" cy="18" r="6" fill="#27c93f"/>
+<text x="90" y="23" font-family="monospace" font-size="13" fill="#8b949e">faceless-qc-lite — real run, 2026-10-31</text>
+<text x="28" y="76" font-family="monospace" font-size="16" fill="#e6edf3">$ python3 src/faceless_qc_lite.py intro-loop.mp4</text>
+<text x="28" y="112" font-family="monospace" font-size="16" fill="#e6edf3">Faceless QC Lite — intro-loop.mp4</text>
+<text x="28" y="148" font-family="monospace" font-size="16" fill="#ff7b72">[HOLD] Loudness: integrated loudness -21.6 LUFS (target -14 +/-2)</text>
+<text x="28" y="184" font-family="monospace" font-size="16" fill="#3fb950">[PASS] Dead air: longest in-story silence 0.0s</text>
+<text x="28" y="220" font-family="monospace" font-size="16" fill="#3fb950">[PASS] Black frames: no black segments &gt;= 0.5s</text>
+<text x="28" y="262" font-family="monospace" font-size="17" font-weight="bold" fill="#ff7b72">Verdict: HOLD — this file was heading for upload 7.6 LUFS too quiet</text>
+</svg>

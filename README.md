@@ -14,6 +14,8 @@ python3 src/faceless_qc_lite.py my-video.mp4
 ```
 Exit codes: 0 PASS, 2 HOLD, 1 error — drop it straight into a publish pipeline.
 
+![Demo — real run output](demo.svg)
+
 ## Real example (our own file, 2026-10-31)
 ```
 Faceless QC Lite — intro-loop.mp4
@@ -32,7 +34,7 @@ Lite (this repo, free forever, MIT) is the 3 checks above.
 The full Faceless QC adds: too-few-pauses intelligence, caption-speed checking, dynamics (LRA), an HTML report naming the worst 3 moments with timestamps, and one-click launchers.
 
 ## Sponsor this work
-If Lite saves you one bad upload, consider sponsoring — sponsorships fund new checks and keep Lite free: use the **Sponsor** button above (GitHub Sponsors: @jasveerai88).
+If Lite saves you one bad upload, consider sponsoring — sponsorships fund new checks and keep Lite free: use the **Sponsor** button above (GitHub Sponsors: @jasveerai88). What each tier gets, and how to claim it: [SPONSOR-REWARDS.md](SPONSOR-REWARDS.md).
 
 ## Privacy
 Runs 100% locally. No telemetry, no accounts, no tracking, nothing uploaded.
