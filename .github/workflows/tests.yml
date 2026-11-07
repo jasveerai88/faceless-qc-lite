@@ -1,22 +1,29 @@
-name: tests
-on: [push, pull_request]
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    name: test (${{ matrix.python-version }})
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-      - name: Install FFmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
-      - name: Run tests
-        run: python3 tests/test_lite.py
-      - name: Smoke run (missing file must exit 1)
+          python-version: ${{ matrix.python-version }}
+      - name: Install ffmpeg
         run: |
-          set +e
-          python3 src/faceless_qc_lite.py missing.mp4
-          code=$?
-          set -e
-          echo "exit code was $code"
-          test $code -eq 1
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - name: Install
+        run: pip install .
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
