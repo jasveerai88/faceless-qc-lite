@@ -1,4 +1,10 @@
 __pycache__/
-*.pyc
+*.py[cod]
 qc-reports/
+.venv/
+venv/
 .DS_Store
+dist/
+build/
+*.egg-info/
+launch/

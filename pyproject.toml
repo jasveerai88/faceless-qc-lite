@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "faceless-qc-lite"
+version = "2.0.0"
+description = "Pre-upload QC for faceless video: the 5 anchor checks plus caption, thumbnail, retention, Shorts-title and link-rot checks — one suite, one receipt."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+    { name = "Jasveer Singh" },
+]
+keywords = [
+    "video",
+    "youtube",
+    "shorts",
+    "captions",
+    "quality-control",
+    "ffmpeg",
+    "cli",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/jasveerai88/faceless-qc-lite"
+Repository = "https://github.com/jasveerai88/faceless-qc-lite"
+Issues = "https://github.com/jasveerai88/faceless-qc-lite/issues"
+Changelog = "https://github.com/jasveerai88/faceless-qc-lite/blob/main/CHANGELOG.md"
+
+[project.scripts]
+faceless-qc-lite = "faceless_qc_suite:main"
+
+# The suite is seven standard-library modules in src/: the
+# faceless_qc_suite dispatcher, the anchor engine
+# (faceless_qc_lite) and the five ported module engines
+# (caption_toolkit, thumbnail_checker, retention_checker,
+# shorts_packager, link_rot), each installed as a top-level
+# module so the dispatcher can import them by name.
+# `python3 src/faceless_qc_lite.py` keeps working from a
+# checkout, exactly as it always has.
+[tool.setuptools]
+package-dir = { "" = "src" }
+py-modules = ["faceless_qc_suite", "faceless_qc_lite", "caption_toolkit", "thumbnail_checker", "retention_checker", "shorts_packager", "link_rot"]
