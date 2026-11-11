@@ -56,8 +56,7 @@ faceless-qc-lite suite my-video.mp4 --captions my-video.srt \
     --hashtags "#shorts" --catalogue catalogue.json
 ```
 
-*(The PyPI name goes live when v2.0.0 is published;
-until then use a source checkout:
+*(Live on PyPI since v2.0.0. Source checkouts also work:
 `python3 src/faceless_qc_lite.py <video>` for the
 anchor, or
 `pipx install git+https://github.com/jasveerai88/faceless-qc-lite`.)*
