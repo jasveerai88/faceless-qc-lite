@@ -332,8 +332,8 @@ and one-click launchers.
 
 If Lite saves you one bad upload, consider sponsoring
 — sponsorships fund new checks and keep Lite free:
-use the **Sponsor** button above (GitHub Sponsors:
-@jasveerai88). What each tier gets, and how to claim
+use the **Sponsor** button above —
+[github.com/sponsors/jasveerai88](https://github.com/sponsors/jasveerai88). What each tier gets, and how to claim
 it: [SPONSOR-REWARDS.md](SPONSOR-REWARDS.md).
 
 ## Tests
